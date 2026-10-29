@@ -65,9 +65,12 @@ async function verifyJwt(token, secret) {
 }
 
 function getJwtSecret(env, sys) {
-  if (isValidJwtSecret(sys?.jwt_secret)) {
-    return sys.jwt_secret;
-  }
+  if (isValidJwtSecret(sys?.jwt_secret)) return sys.jwt_secret;
+  if (isValidJwtSecret(env.API_SECRET)) return env.API_SECRET;
+  // 没有可用的密钥来源：直接抛错，禁止签发/验证 token
+  throw new Error('JWT secret is not configured');
+}
+  
 
   const fallback = env.API_SECRET || 'default_jwt_secret_for_server_monitor';
   return fallback.padEnd(32, 'x').substring(0, 64);
